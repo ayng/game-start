@@ -2,36 +2,40 @@
 
 #include "SDL.h"
 
-int main(int argc, char *argv[]) {
-  SDL_Window *window;                    // Declare a pointer
+#ifdef __EMSCRIPTEN__
+#include <emscripten.h>
+#include <emscripten/html5.h>
+#endif
 
-  SDL_Init(SDL_INIT_VIDEO);              // Initialize SDL2
+#ifdef __EMSCRIPTEN__
+EM_BOOL
+#else
+bool
+#endif
+one_iter(double time, void *userData)
+{
+  // TODO render here
+  std::cout << "time: " << time << std::endl;
 
-  // Create an application window with the following settings:
-  window = SDL_CreateWindow(
-      "An SDL2 window",                  // window title
-      SDL_WINDOWPOS_UNDEFINED,           // initial x position
-      SDL_WINDOWPOS_UNDEFINED,           // initial y position
-      640,                               // width, in pixels
-      480,                               // height, in pixels
-      SDL_WINDOW_OPENGL                  // flags - see below
-  );
+#ifdef __EMSCRIPTEN__
+  // Return true to keep the loop running.
+  return EM_TRUE;
+#else
+  return true;
+#endif
+}
 
-  // Check that the window was successfully created
-  if (window == NULL) {
-      // In the case that the window could not be made...
-      std::cout << "Could not create window: " << SDL_GetError() << std::endl;
-      return 1;
+int main(int argc, char **argv) {
+#ifdef __EMSCRIPTEN__
+  // Receives a function to call and some user data to provide it.
+  emscripten_request_animation_frame_loop(one_iter, nullptr);
+#else
+  double ticks;
+  while (true) {
+    ticks = SDL_GetTicks();
+    one_iter(ticks, nullptr);
+    // Delay to keep frame rate constant.
+    SDL_Delay(17);
   }
-
-  // The window is open: could enter program loop here (see SDL_PollEvent())
-
-  SDL_Delay(3000);  // Pause execution for 3000 milliseconds, for example
-
-  // Close and destroy the window
-  SDL_DestroyWindow(window);
-
-  // Clean up
-  SDL_Quit();
-  return 0;
+#endif
 }

@@ -17,3 +17,16 @@ builds natively to Windows.
 1. Generate build directory: `cmake -B build -DCMAKE_BUILD_TYPE=Release`
 1. Compile and link: `cmake --build build`
 1. Execute program: `build/MyGame.exe`
+
+### Web
+
+(Tested on Linux)
+
+1. Install [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
+1. Install additional development dependences: cmake, make, git, python3
+1. Generate build directory: `emcmake cmake -B build`
+1. Compile and link: `emmake cmake --build build`
+1. `cd build`
+1. (TODO: automate this) Manually set up [shell_minimal.html](https://github.com/emscripten-core/emscripten/blob/main/src/shell_minimal.html) in the build directory
+1. Run a local server: `python3 -m http.server`
+1. Visit the served page in your browser e.g. `http://localhost:8000`
