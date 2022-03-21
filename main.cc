@@ -7,35 +7,49 @@
 #include <emscripten/html5.h>
 #endif
 
-#ifdef __EMSCRIPTEN__
-EM_BOOL
-#else
-bool
-#endif
-one_iter(double time, void *userData)
-{
-  // TODO render here
-  std::cout << "time: " << time << std::endl;
-
-#ifdef __EMSCRIPTEN__
-  // Return true to keep the loop running.
-  return EM_TRUE;
-#else
-  return true;
-#endif
+void mainLoop(double dt) {
+  std::cout << dt << std::endl;
 }
 
-int main(int argc, char **argv) {
+
 #ifdef __EMSCRIPTEN__
-  // Receives a function to call and some user data to provide it.
-  emscripten_request_animation_frame_loop(one_iter, nullptr);
+EM_BOOL emLoop(double time, void *userData) {
+  // This function-local static variable is initialized exactly once --
+  // when control first passes through its declaration -- i.e. subsequent
+  // calls to this function will not reset this value.
+  static double prevTime = 0;
+
+  double dt = time - prevTime;
+  prevTime = time;
+
+  mainLoop(dt);
+
+  return EM_TRUE;
+}
+#endif
+
+int main(int argc, char **argv) {
+
+#ifdef __EMSCRIPTEN__
+
+  emscripten_request_animation_frame_loop(emLoop, nullptr);
+
 #else
-  double ticks;
+
+  double dt;
+  double prevTicks = 0;
+
   while (true) {
-    ticks = SDL_GetTicks();
-    one_iter(ticks, nullptr);
-    // Delay to keep frame rate constant.
+
+    double ticks = SDL_GetTicks();
+    dt = ticks - prevTicks;
+    prevTicks = ticks;
+
+    mainLoop(dt);
+
     SDL_Delay(17);
   }
+
 #endif
+
 }
