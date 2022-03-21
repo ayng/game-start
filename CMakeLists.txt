@@ -9,9 +9,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 add_executable(${PROJECT_NAME} main.cc)
 
+set(CMAKE_MODULE_PATH sdl2-cmake-modules/)
+
 find_package(SDL2 REQUIRED)
-target_include_directories(${PROJECT_NAME} PRIVATE ${SDL2_INCLUDE_DIRS})
-target_link_libraries(${PROJECT_NAME} PRIVATE ${SDL2_LIBRARIES})
-IF(MINGW)
-  target_link_libraries(${PROJECT_NAME} PRIVATE -lmingw32 -lSDL2main -lSDL2)
-ENDIF(MINGW)
+
+target_link_libraries(${PROJECT_NAME} SDL2::Main)
