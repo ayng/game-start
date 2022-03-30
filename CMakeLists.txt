@@ -12,8 +12,9 @@ add_executable(${PROJECT_NAME} main.cc)
 set(CMAKE_MODULE_PATH cmake/sdl2/)
 
 find_package(SDL2 REQUIRED)
+find_package(SDL2_image REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} SDL2::Main)
+target_link_libraries(${PROJECT_NAME} SDL2::Main SDL2::Image)
 
 # On Windows, if the -mconsole flag is not included, the program will not print
 # to stdout, nor will it respond to signals.
