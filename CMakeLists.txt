@@ -9,15 +9,21 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 add_executable(${PROJECT_NAME} main.cc)
 
+configure_file(SDL_logo.bmp SDL_logo.bmp COPYONLY)
+
 set(CMAKE_MODULE_PATH cmake/sdl2/)
 
 find_package(SDL2 REQUIRED)
-find_package(SDL2_image REQUIRED)
 
-target_link_libraries(${PROJECT_NAME} SDL2::Main SDL2::Image)
+target_link_libraries(${PROJECT_NAME} SDL2::Main)
 
 # On Windows, if the -mconsole flag is not included, the program will not print
 # to stdout, nor will it respond to signals.
 IF(WIN32)
   target_link_options(${PROJECT_NAME} PRIVATE -mconsole)
 ENDIF(WIN32)
+
+IF(EMSCRIPTEN)
+  target_link_options(${PROJECT_NAME} PRIVATE --preload-file SDL_logo.bmp)
+  configure_file(index.html index.html COPYONLY)
+ENDIF(EMSCRIPTEN)
