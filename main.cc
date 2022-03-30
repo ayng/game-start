@@ -62,12 +62,12 @@ int main(int argc, char **argv) {
     shouldQuit = mainLoop(dt);
     SDL_Delay(17);
   }
-#endif
 
   SDL_DestroyRenderer(renderer);
   SDL_DestroyWindow(window);
 
   SDL_Quit();
+#endif
 
   return 0;
 }
