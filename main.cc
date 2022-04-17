@@ -2,6 +2,7 @@
 
 #include <SDL2/SDL.h>
 #include <SDL2/SDL_image.h>
+#include <SDL2/SDL_mixer.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -13,6 +14,8 @@ class GameData {
   SDL_Window* window;
   SDL_Renderer* renderer;
   SDL_Texture* texture;
+  Mix_Chunk* sfx_placeholder;
+  bool is_mouse_down;
   SDL_Rect rect;
 };
 
@@ -22,10 +25,21 @@ bool mainLoop(double dt, GameData& g) {
   if (event.type == SDL_QUIT) {
     return false;
   }
+  if (event.type == SDL_MOUSEBUTTONDOWN) {
+    Mix_PlayChannel(-1, g.sfx_placeholder, 0);
+    g.is_mouse_down = true;
+  }
+  if (event.type == SDL_MOUSEBUTTONUP) {
+    g.is_mouse_down = false;
+  }
 
   g.rect.x = 320 - g.rect.w / 2;
   g.rect.y = 240 - g.rect.h / 2;
+  if (g.is_mouse_down) {
+    g.rect.y += 12;
+  }
 
+  SDL_RenderClear(g.renderer);
   SDL_RenderCopy(g.renderer, g.texture, nullptr, &g.rect);
   SDL_RenderPresent(g.renderer);
 
@@ -64,6 +78,7 @@ int main(int argc, char **argv) {
     return 1;
   }
 
+
   SDL_Surface* surface = IMG_Load("assets/SDL_logo.png");
   if (!surface) {
     std::cout << "IMG_Load: " << IMG_GetError() << std::endl;
@@ -72,6 +87,16 @@ int main(int argc, char **argv) {
   SDL_GetClipRect(surface, &gameData.rect);
   gameData.texture = SDL_CreateTextureFromSurface(gameData.renderer, surface);
   SDL_FreeSurface(surface);
+
+  if (Mix_OpenAudio(44100, MIX_DEFAULT_FORMAT, 2, 1024) == -1) {
+    std::cout << "Mix_OpenAudio: " << Mix_GetError() << std::endl;
+    return 1;
+  }
+
+  gameData.sfx_placeholder = Mix_LoadWAV("assets/bloop.wav");
+  if (!gameData.sfx_placeholder) {
+    std::cout << "Mix_LoadWAV: " << Mix_GetError() << std::endl;
+  }
 
 #ifdef __EMSCRIPTEN__
   emscripten_request_animation_frame_loop(emLoop, (void*) &gameData);
@@ -87,6 +112,9 @@ int main(int argc, char **argv) {
     shouldContinue = mainLoop(dt, gameData);
     SDL_Delay(17);
   }
+
+  Mix_CloseAudio();
+  Mix_FreeChunk(gameData.sfx_placeholder);
 
   SDL_DestroyRenderer(gameData.renderer);
   SDL_DestroyWindow(gameData.window);
