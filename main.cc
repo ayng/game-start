@@ -1,6 +1,7 @@
 #include <iostream>
 
 #include <SDL2/SDL.h>
+#include <SDL2/SDL_image.h>
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten.h>
@@ -15,7 +16,7 @@ class GameData {
   SDL_Rect rect;
 };
 
-bool runLoop(double dt, GameData& g) {
+bool mainLoop(double dt, GameData& g) {
   SDL_Event event;
   SDL_PollEvent(&event);
   if (event.type == SDL_QUIT) {
@@ -43,7 +44,7 @@ EM_BOOL emLoop(double time, void* gameData) {
   const double dt = time - prevTime;
   prevTime = time;
 
-  const bool shouldContinue = runLoop(dt, *((GameData*) gameData));
+  const bool shouldContinue = mainLoop(dt, *((GameData*) gameData));
 
   return shouldContinue ? EM_TRUE : EM_FALSE;
 }
@@ -63,9 +64,9 @@ int main(int argc, char **argv) {
     return 1;
   }
 
-  SDL_Surface* surface = SDL_LoadBMP("SDL_logo.bmp");
+  SDL_Surface* surface = IMG_Load("assets/SDL_logo.png");
   if (!surface) {
-    std::cout << "SDL_LoadBMP: " << SDL_GetError() << std::endl;
+    std::cout << "IMG_Load: " << IMG_GetError() << std::endl;
     return 1;
   }
   SDL_GetClipRect(surface, &gameData.rect);
@@ -83,7 +84,7 @@ int main(int argc, char **argv) {
     double ticks = SDL_GetTicks();
     dt = ticks - prevTicks;
     prevTicks = ticks;
-    shouldContinue = runLoop(dt, gameData);
+    shouldContinue = mainLoop(dt, gameData);
     SDL_Delay(17);
   }
 

@@ -9,21 +9,27 @@ set(CMAKE_CXX_STANDARD_REQUIRED YES)
 
 add_executable(${PROJECT_NAME} main.cc)
 
-configure_file(SDL_logo.bmp SDL_logo.bmp COPYONLY)
-
-set(CMAKE_MODULE_PATH cmake/sdl2/)
-
-find_package(SDL2 REQUIRED)
-
-target_link_libraries(${PROJECT_NAME} SDL2::Main)
-
-# On Windows, if the -mconsole flag is not included, the program will not print
-# to stdout, nor will it respond to signals.
-IF(WIN32)
-  target_link_options(${PROJECT_NAME} PRIVATE -mconsole)
-ENDIF(WIN32)
+configure_file(assets/SDL_logo.png assets/SDL_logo.png COPYONLY)
 
 IF(EMSCRIPTEN)
-  target_link_options(${PROJECT_NAME} PRIVATE --preload-file SDL_logo.bmp)
+  # To build with Emscripten, use the various hardcoded flags to pull in
+  # ports. To list the available ports, run `emcc --show-ports`.
+  target_link_options(${PROJECT_NAME} PRIVATE -sUSE_SDL=2)
+  target_link_options(${PROJECT_NAME} PRIVATE -sUSE_SDL_IMAGE=2)
+  target_link_options(${PROJECT_NAME} PRIVATE --use-preload-plugins)
+  target_link_options(${PROJECT_NAME} PRIVATE --preload-file assets)
   configure_file(index.html index.html COPYONLY)
-ENDIF(EMSCRIPTEN)
+ELSE()
+  set(CMAKE_MODULE_PATH cmake/sdl2/)
+  find_package(SDL2 REQUIRED)
+  find_package(SDL2_image REQUIRED)
+  target_link_libraries(${PROJECT_NAME} SDL2::Main SDL2::Image)
+
+  # On Windows, if the -mconsole flag is not included, the program will not
+  # print to stdout, nor will it respond to signals. Don't include this flag
+  # when shipping.
+  # TODO use a log file in both debug and release builds.
+  IF(WIN32)
+    target_link_options(${PROJECT_NAME} PRIVATE -mconsole)
+  ENDIF(WIN32)
+ENDIF()
