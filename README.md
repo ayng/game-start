@@ -26,9 +26,9 @@ builds natively to Windows.
 1. Install [Emscripten](https://emscripten.org/docs/getting_started/downloads.html)
 1. Install additional development dependences: cmake, make, git, python3
 1. `git clone` this repo and `cd` into it
-1. Pull down third-party CMake modules: `git submodule update --init`
 1. Generate build directory: `emcmake cmake -B build`
 1. Compile and link: `emmake cmake --build build`
+    - Note: for some reason this will not work until you've cached the requisite ports, e.g. by invoking emcc manually: `emcc -sUSE_SDL=2 -sUSE_SDL_MIXER=2 -sUSE_SDL_TTF=2 -sUSE_SDL_IMAGE=2 main.cc`
 1. `cd build`
 1. Run a local server: `python3 -m http.server`
 1. Visit the served page in your browser e.g. `http://localhost:8000`
@@ -36,5 +36,5 @@ builds natively to Windows.
 ### Troubleshooting
 
 - If CMake is having trouble finding SDL2 libraries, make sure that:
-  - SDL2 development libraries are installed on your machine
-  - `git submodule update --init` to get the CMake modules for finding SDL2 libraries
+    - SDL2 development libraries are installed on your machine
+    - `git submodule update --init` to get the CMake modules for finding SDL2 libraries
